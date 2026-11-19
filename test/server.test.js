@@ -153,3 +153,11 @@ test('logs never contain the secret key', () => {
   assert.ok(logs.length > 0);
   assert.ok(!JSON.stringify(logs).includes('sk_test_fake'));
 });
+
+test('NOT_PAID_YET message does not promise a link it does not contain', async () => {
+  const ref = await newPaidLink();
+  const r = await checkPayment({ reference: ref }, deps);
+  assert.equal(r.status, 'NOT_PAID_YET');
+  assert.doesNotMatch(r.customer_message, /here'?s your link/i);
+  assert.match(r.customer_message, /link I sent/i);
+});
