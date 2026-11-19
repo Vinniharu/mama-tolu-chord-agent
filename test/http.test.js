@@ -8,7 +8,7 @@ let fake, server, base;
 before(async () => {
   fake = await startFakePaystack();
   process.env.MCP_AUTH_TOKEN = TOKEN;
-  process.env.PAYSTACK_SECRET_KEY = 'sk_test_fake';
+  process.env.PAYSTACK_SECRET_KEY = 'sk_test_' + 'a1'.repeat(20);
   process.env.PAYSTACK_BASE_URL = fake.url;
   server = createLocalServer();
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
@@ -68,4 +68,14 @@ test('GET /health reports a test key without exposing it', async () => {
   const res = await fetch(`${base}/health`);
   const body = await res.json();
   assert.deepEqual(body, { ok: true, service: 'mama-tolu-mcp', paystack_key: 'test' });
+});
+
+test('GET /health flags a placeholder key like "sk_test_..."', async () => {
+  const saved = process.env.PAYSTACK_SECRET_KEY;
+  process.env.PAYSTACK_SECRET_KEY = 'sk_test_...';
+  try {
+    assert.equal((await (await fetch(`${base}/health`)).json()).paystack_key, 'placeholder');
+  } finally {
+    process.env.PAYSTACK_SECRET_KEY = saved;
+  }
 });
