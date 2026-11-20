@@ -1,0 +1,9 @@
+.env
+.env.*
+.superpowers
+node_modules
+test
+docs
+skill
+scripts
+*.log
